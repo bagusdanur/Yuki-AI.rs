@@ -352,7 +352,12 @@ impl ExprParser<'_> {
                     .unwrap_or(false)
                 {
                     // Hentikan exponent bila tanda bukan tepat setelah e/E.
-                    let prev = self.chars[self.pos - 1];
+                    // pos bisa 0 bila ekspresi diawali angka — jaga underflow.
+                    let prev = if self.pos > 0 {
+                        self.chars[self.pos - 1]
+                    } else {
+                        '\0'
+                    };
                     let cur = self.peek().unwrap();
                     if (cur == '+' || cur == '-') && !matches!(prev, 'e' | 'E') {
                         break;
@@ -950,4 +955,36 @@ async fn delegate_tasks_tool(args: &Value, ctx: &ToolContext) -> Value {
         ctx,
     )
     .await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::calculate_expression;
+    use serde_json::json;
+
+    fn calc(expr: &str) -> f64 {
+        let out = calculate_expression(&json!({ "expression": expr }));
+        out["result"]
+            .as_f64()
+            .unwrap_or_else(|| panic!("ekspresi {expr:?} gagal: {out}"))
+    }
+
+    #[test]
+    fn kalkulator_angka_di_posisi_nol() {
+        // Regresi: panic underflow chars[pos-1] saat ekspresi diawali
+        // angka (bug report VPS 2026-11-09, "17*23" -> koneksi gugur).
+        assert_eq!(calc("17*23"), 391.0);
+        assert_eq!(calc("17 * 23"), 391.0);
+        assert_eq!(calc("17×23"), 391.0);
+        assert_eq!(calc("2+3*4"), 14.0);
+        assert_eq!(calc("(2+3)*4"), 20.0);
+        assert_eq!(calc("10/4"), 2.5);
+        assert_eq!(calc("-5+3"), -2.0);
+    }
+
+    #[test]
+    fn kalkulator_eksponen_di_posisi_nol() {
+        assert_eq!(calc("1e3+1"), 1001.0);
+        assert_eq!(calc("1.5e-2"), 0.015);
+    }
 }
