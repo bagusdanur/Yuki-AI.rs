@@ -116,6 +116,21 @@ fn strip_tags(html: &str) -> String {
     Regex::new(r"<[^>]+>").unwrap().replace_all(html, "").trim().to_string()
 }
 
+/// Buang blok <script>/<style>/dll beserta isinya sebelum ekstraksi teks.
+/// Pola JS asli memakai negative look-ahead (?!:</tag>) yang TIDAK
+/// didukung crate `regex` — Regex::new-nya gagal dan unwrap() panik di
+/// setiap read_url (bug report VPS 2026-11-09). Non-greedy berhenti di
+/// tag penutup pertama; setara untuk halaman umum (tag sejenis bersarang
+/// sangat jarang).
+fn strip_block_tags(html: &str) -> String {
+    let mut cleaned = html.to_string();
+    for tag in ["script", "style", "nav", "footer", "header", "svg", "noscript"] {
+        let re = Regex::new(&format!(r"(?is)<{tag}\b[^>]*>.*?</{tag}>")).unwrap();
+        cleaned = re.replace_all(&cleaned, "").to_string();
+    }
+    cleaned
+}
+
 fn url_encode_component(value: &str) -> String {
     let mut out = String::new();
     for byte in value.bytes() {
@@ -393,11 +408,7 @@ async fn read_url(args: &Value) -> Value {
         .captures(&html)
         .map(|c| strip_tags(&c[1]))
         .unwrap_or_default();
-    let mut cleaned = html.clone();
-    for tag in ["script", "style", "nav", "footer", "header", "svg", "noscript"] {
-        let re = Regex::new(&format!(r"(?is)<{tag}\b[^<]*(?:(?!:</{tag}>)<[^<]*)*</{tag}>")).unwrap();
-        cleaned = re.replace_all(&cleaned, "").to_string();
-    }
+    let mut cleaned = strip_block_tags(&html);
     cleaned = Regex::new(r"<[^>]+>").unwrap().replace_all(&cleaned, " ").to_string();
     cleaned = cleaned
         .replace("&nbsp;", " ")
@@ -1020,4 +1031,26 @@ pub async fn dispatch_web(tool_name: &str, args: &Value, ctx: &ToolContext) -> V
 
 pub fn adult_default() -> bool {
     ryukomik_adult_default()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::strip_block_tags;
+
+    #[test]
+    fn strip_block_tags_tanpa_lookaround() {
+        // Regresi: pola lama memakai negative look-ahead (?!:</tag>) yang
+        // tidak didukung crate regex -> Regex::new gagal -> unwrap panik
+        // di setiap read_url (bug report VPS 2026-11-09).
+        let html = "<html><head><style>body{color:red}</style>\
+            <script>if (a<b) { go(); }</script></head>\
+            <body><nav>Menu</nav><p>Halo dunia</p>\
+            <footer>Kaki</footer><script src=\"x.js\"></script></body></html>";
+        let out = strip_block_tags(html);
+        assert!(out.contains("Halo dunia"), "teks utama hilang: {out}");
+        assert!(!out.contains("color:red"), "style bocor: {out}");
+        assert!(!out.contains("go();"), "script bocor: {out}");
+        assert!(!out.contains("Menu"), "nav bocor: {out}");
+        assert!(!out.contains("Kaki"), "footer bocor: {out}");
+    }
 }

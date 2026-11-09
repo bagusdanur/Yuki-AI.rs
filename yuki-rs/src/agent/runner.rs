@@ -186,9 +186,22 @@ pub fn extract_tool_calls_from_text(content: &str) -> Vec<Value> {
             .map(|c| c[1].to_string());
         let mut replacements: Vec<Value> = Vec::new();
         if let Some(body_replacements) = &replacements_body {
-            for item in re(r"(?is)\{\s*new_text\s*:\s*([\s\S]*?),\s*old_text\s*:\s*([\s\S]*?)\s*\}(?=\s*,\s*\{|\s*$)")
+            for item in re(r"(?is)\{\s*new_text\s*:\s*([\s\S]*?),\s*old_text\s*:\s*([\s\S]*?)\s*\}")
                 .captures_iter(body_replacements)
             {
+                // Setara look-ahead Node (?=\s*,\s*\{|\s*$): crate `regex`
+                // tidak mendukung look-around, jadi terminator item dicek
+                // manual — item hanya valid bila diikuti koma+item
+                // berikutnya atau akhir string.
+                let end = item.get(0).unwrap().end();
+                let rest = body_replacements[end..].trim_start();
+                let followed_by_next = rest
+                    .strip_prefix(',')
+                    .map(|r| r.trim_start().starts_with('{'))
+                    .unwrap_or(false);
+                if !rest.is_empty() && !followed_by_next {
+                    continue;
+                }
                 replacements.push(json!({ "new_text": &item[1], "old_text": &item[2] }));
             }
         }
@@ -1773,4 +1786,21 @@ pub async fn run_agent(
         "comics": comic_results.iter().take(6).cloned().collect::<Vec<_>>(),
         "plan": execution_plan,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::extract_tool_calls_from_text;
+
+    #[test]
+    fn format_inline_replacements_tanpa_lookaround() {
+        // Regresi: pola item replacements memakai look-ahead (?=...) yang
+        // tidak didukung crate regex -> re() unwrap panik saat provider
+        // mengirim format inline dengan replacements.
+        let text = "<call:edit_file {path: berkas.txt, hash: abc123, replacements: [{new_text: BARU, old_text: LAMA}, {new_text: DUA, old_text: SATU}]}";
+        let calls = extract_tool_calls_from_text(text);
+        assert_eq!(calls.len(), 1, "calls: {calls:?}");
+        let args = calls[0]["function"]["arguments"].as_str().unwrap_or("");
+        assert!(args.contains("BARU") && args.contains("DUA"), "args: {args}");
+    }
 }
