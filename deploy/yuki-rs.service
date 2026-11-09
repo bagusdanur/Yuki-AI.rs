@@ -1,0 +1,19 @@
+[Unit]
+Description=Yuki AI (Rust)
+After=network.target
+
+[Service]
+Type=simple
+# Sesuaikan user & path dengan VPS.
+User=www-data
+WorkingDirectory=/opt/yuki-rs
+EnvironmentFile=/opt/yuki-rs/yuki.env
+ExecStart=/opt/yuki-rs/yuki-rs
+Restart=on-failure
+RestartSec=3
+# Sandbox JS agent butuh binary node di PATH (fitur run_javascript_code,
+# tes workspace, validasi .ts). Node sudah terpasang untuk Yuki versi lama.
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=multi-user.target

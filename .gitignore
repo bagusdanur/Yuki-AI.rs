@@ -1,0 +1,11 @@
+# Hasil build & artefak runtime — dirangkai saat deploy, bukan di repo
+/yuki-rs/target/
+/yuki-rs/data/
+/deploy/yuki-rs
+/deploy/embed/
+/deploy/app/
+/chrome-for-testing/
+/original/
+*.db
+*.log
+.muse-github-snapshot-sync.json

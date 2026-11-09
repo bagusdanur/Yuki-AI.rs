@@ -1,0 +1,46 @@
+[package]
+name = "yuki-rs"
+version = "0.1.0"
+edition = "2021"
+description = "Port Rust bertahap dari Yuki Agent (bagusdanur/Yuki---AI) - Fase 0: fondasi"
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.6", features = ["fs", "trace"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1"
+rusqlite = { version = "0.32", features = ["bundled"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+hmac = "0.12"
+sha2 = "0.10"
+base64 = "0.22"
+rand = "0.8"
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+regex = "1"
+scrypt = "0.11"
+ort = { version = "2.0.0-rc.12", default-features = false, features = ["std", "download-binaries", "tls-rustls", "copy-dylibs", "ndarray"] }
+tokenizers = { version = "0.20", default-features = false, features = ["onig"] }
+chrono-tz = "0.10"
+p256 = { version = "0.13", features = ["ecdh", "ecdsa"] }
+aes-gcm = "0.10"
+hkdf = "0.12"
+url = "2"
+tokio-tungstenite = { version = "0.26", features = ["rustls-tls-webpki-roots"] }
+rquickjs = "0.8"
+tree-sitter = "0.24"
+tree-sitter-typescript = "0.23"
+futures-util = "0.3"
+
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true

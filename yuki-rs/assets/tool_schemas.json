@@ -1,0 +1,967 @@
+[
+ {
+  "type": "function",
+  "function": {
+   "name": "analyze_code_syntax",
+   "description": "Menganalisis sintaks kode, mendeteksi bug, memeriksa format JSON/SQL/JS/Python, dan validasi struktur kode.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "code": {
+      "type": "string",
+      "description": "Potongan kode atau teks yang ingin dianalisis"
+     },
+     "language": {
+      "type": "string",
+      "description": "Bahasa pemrograman (\"javascript\", \"json\", \"python\", \"html\", \"css\", \"sql\")"
+     }
+    },
+    "required": [
+     "code"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "run_javascript_code",
+   "description": "Menjalankan snippet kode JavaScript di sandbox terisolasi untuk manipulasi teks, regex, atau algoritma.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "code": {
+      "type": "string",
+      "description": "Kode JavaScript yang akan dijalankan"
+     }
+    },
+    "required": [
+     "code"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "delegate_tasks",
+   "description": "Membagi task besar menjadi 2-4 subtask yang dikerjakan paralel oleh subagent mandiri, lalu hasilnya digabungkan. Gunakan untuk riset multi-aspek, perbandingan, atau analisis kompleks.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "tasks": {
+      "type": "array",
+      "description": "Daftar 2-4 subtask spesifik yang dikerjakan paralel (tiap item adalah string deskripsi tugas)",
+      "items": {
+       "type": "string"
+      }
+     },
+     "shared_context": {
+      "type": "string",
+      "description": "Konteks bersama untuk semua subagent (topik utama, batasan)"
+     }
+    },
+    "required": [
+     "tasks"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "validate_interactive_artifact",
+   "description": "Memeriksa keseimbangan tag dan sintaks JavaScript artifact tanpa menjalankannya atau menyimpan file.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "html_content": {
+      "type": "string",
+      "description": "Kode HTML/CSS/JavaScript artifact yang diperiksa"
+     }
+    },
+    "required": [
+     "html_content"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "build_interactive_artifact",
+   "description": "Merakit mini-aplikasi web mandiri baru (HTML5/CSS/JS/Canvas/WebAudio) yang langsung dapat dijalankan di Live Sandbox dan disimpan ke workspace user.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "title": {
+      "type": "string",
+      "description": "Judul artifact (misal \"Retro Platformer\", \"Neon Snake 2D\")"
+     },
+     "type": {
+      "type": "string",
+      "enum": [
+       "html",
+       "javascript",
+       "svg"
+      ],
+      "description": "Tipe artifact (default: html)"
+     },
+     "html_content": {
+      "type": "string",
+      "description": "Kode HTML/JS lengkap mandiri"
+     }
+    },
+    "required": [
+     "title",
+     "html_content"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "get_active_artifact",
+   "description": "Membaca seluruh kode sumber, versi, dan metadata dari file artifact/game yang sedang aktif di workspace user saat ini.",
+   "parameters": {
+    "type": "object",
+    "properties": {}
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "read_artifact_file",
+   "description": "Membaca file artifact spesifik berdasarkan ID uniknya.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "description": "ID unik artifact (misal \"art_xxxx\")"
+     }
+    },
+    "required": [
+     "id"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "update_interactive_artifact",
+   "description": "Memperbarui file artifact yang sudah ada (menambahkan level baru, memperbaiki bug, menyetel parameter game) tanpa membuat ulang dari nol, serta menaikkan nomor versinya.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "description": "ID artifact yang diperbarui (opsional)"
+     },
+     "title": {
+      "type": "string",
+      "description": "Judul artifact"
+     },
+     "html_content": {
+      "type": "string",
+      "description": "Seluruh kode HTML/JS lengkap hasil modifikasi/penambahan fitur"
+     },
+     "patch_note": {
+      "type": "string",
+      "description": "Ringkasan perubahan (misal \"Menambahkan Level 4 dan Level 5\")"
+     }
+    },
+    "required": [
+     "html_content"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "patch_interactive_artifact",
+   "description": "Menerapkan 1-20 penggantian teks atomik pada artifact aktif tanpa mengirim ulang seluruh HTML. Pilihan utama untuk bugfix game agar hemat token.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "description": "ID artifact opsional; default artifact aktif"
+     },
+     "old_text": {
+      "type": "string",
+      "description": "Potongan lama untuk satu patch"
+     },
+     "new_text": {
+      "type": "string",
+      "description": "Potongan pengganti untuk satu patch"
+     },
+     "replacements": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "old_text": {
+         "type": "string"
+        },
+        "new_text": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "old_text",
+        "new_text"
+       ]
+      }
+     },
+     "patch_note": {
+      "type": "string",
+      "description": "Penjelasan perubahan yang tampil di laporan Yuki"
+     }
+    }
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "calculate_expression",
+   "description": "Menghitung rumus matematika, persentase, atau kalkulasi angka presisi.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "expression": {
+      "type": "string",
+      "description": "Rumus matematika (misal \"(250000 * 0.85) + 12000\")"
+     }
+    },
+    "required": [
+     "expression"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "list_workspace_files",
+   "description": "Melihat struktur file hanya di coding workspace terisolasi milik pengguna dan tidak dapat melihat project lain.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "path": {
+      "type": "string",
+      "description": "Path relatif dalam workspace, default \".\""
+     },
+     "depth": {
+      "type": "integer",
+      "description": "Kedalaman daftar folder 1-5"
+     }
+    }
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "read_workspace_file",
+   "description": "Membaca rentang baris file teks dalam workspace dan mengembalikan hash yang wajib dipakai saat mengedit.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "path": {
+      "type": "string",
+      "description": "Path relatif file dalam workspace"
+     },
+     "start_line": {
+      "type": "integer",
+      "description": "Baris awal, default 1"
+     },
+     "end_line": {
+      "type": "integer",
+      "description": "Baris akhir, maksimal 400 baris per panggilan"
+     }
+    },
+    "required": [
+     "path"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "search_workspace_code",
+   "description": "Mencari teks atau simbol di seluruh file workspace sebelum menentukan lokasi perbaikan.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string",
+      "description": "Teks atau simbol yang dicari"
+     },
+     "path": {
+      "type": "string",
+      "description": "Folder/file relatif, default \".\""
+     },
+     "max_results": {
+      "type": "integer",
+      "description": "Maksimal hasil, default 50"
+     }
+    },
+    "required": [
+     "query"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "create_workspace_file",
+   "description": "Membuat file baru di workspace. Gagal jika file sudah ada; jangan gunakan untuk mengganti kode lama.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "path": {
+      "type": "string",
+      "description": "Path relatif file baru"
+     },
+     "content": {
+      "type": "string",
+      "description": "Isi file baru"
+     }
+    },
+    "required": [
+     "path",
+     "content"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "replace_workspace_text",
+   "description": "Menerapkan patch minimal dengan mengganti satu potongan teks yang cocok tepat satu kali. Wajib membaca file dahulu dan menyertakan hash terbaru.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "path": {
+      "type": "string",
+      "description": "Path relatif file yang diperbaiki"
+     },
+     "old_text": {
+      "type": "string",
+      "description": "Potongan kode lama yang cocok tepat satu kali"
+     },
+     "new_text": {
+      "type": "string",
+      "description": "Kode pengganti"
+     },
+     "replacements": {
+      "type": "array",
+      "description": "Alternatif untuk beberapa penggantian atomik dalam file yang sama.",
+      "items": {
+       "type": "object",
+       "properties": {
+        "old_text": {
+         "type": "string"
+        },
+        "new_text": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "old_text",
+        "new_text"
+       ]
+      }
+     },
+     "expected_hash": {
+      "type": "string",
+      "description": "Hash dari read_workspace_file terakhir"
+     }
+    },
+    "required": [
+     "path",
+     "expected_hash"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "get_workspace_diff",
+   "description": "Melihat diff ringkas antara file saat ini dan snapshot sebelum edit terakhir.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "path": {
+      "type": "string",
+      "description": "Path relatif file"
+     }
+    },
+    "required": [
+     "path"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "rollback_workspace_file",
+   "description": "Mengembalikan file ke snapshot sebelum perubahan terakhir jika patch menimbulkan regresi.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "path": {
+      "type": "string",
+      "description": "Path relatif file"
+     },
+     "snapshot_id": {
+      "type": "string",
+      "description": "ID snapshot opsional; default snapshot terbaru"
+     }
+    },
+    "required": [
+     "path"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "patch_workspace_files",
+   "description": "Menerapkan 2-10 patch file sebagai satu kelompok setelah semua hash dan old_text tervalidasi.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "patches": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "path": {
+         "type": "string"
+        },
+        "old_text": {
+         "type": "string"
+        },
+        "new_text": {
+         "type": "string"
+        },
+        "expected_hash": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "path",
+        "old_text",
+        "new_text",
+        "expected_hash"
+       ]
+      }
+     }
+    },
+    "required": [
+     "patches"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "validate_workspace_project",
+   "description": "Memvalidasi sintaks dasar JS, TypeScript, JSON, HTML, dan CSS dalam workspace tanpa menjalankan shell atau kode proyek.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "path": {
+      "type": "string",
+      "description": "Path relatif file/folder, default \".\""
+     }
+    }
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "run_workspace_tests",
+   "description": "Menjalankan satu file test JavaScript di Node permission sandbox tanpa shell, network, child process, atau akses file di luar workspace.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "path": {
+      "type": "string",
+      "description": "Path relatif test pada folder test/tests/__tests__ atau file *.test.js/*.spec.js"
+     }
+    },
+    "required": [
+     "path"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "record_self_improvement",
+   "description": "Mencatat evaluasi mandiri, wawasan coding, pelajaran perbaikan bug, atau teknik baru ke database memori jangka panjang agar Yuki semakin pintar di masa mendatang.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "topic": {
+      "type": "string",
+      "description": "Topik perbaikan atau pelajaran (misal \"Platformer Collision Bugfix\", \"Audio Autoplay Fix\")"
+     },
+     "skill_affected": {
+      "type": "string",
+      "description": "Skill yang terkait (\"computing\", \"browser\", \"research\", \"general\")"
+     },
+     "learning_summary": {
+      "type": "string",
+      "description": "Ringkasan pelajaran atau solusi perbaikan bug yang ditemukan"
+     }
+    },
+    "required": [
+     "topic",
+     "learning_summary"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "list_self_improvements",
+   "description": "Membaca daftar riwayat pelajaran, catatan perbaikan bug, dan evaluasi mandiri yang tersimpan di memori Yuki.",
+   "parameters": {
+    "type": "object",
+    "properties": {}
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "search_ryukomik",
+   "description": "Mencari komik/manga/manhwa/manhua di katalog Ryukomik berdasarkan judul atau kata kunci.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string",
+      "description": "Judul komik atau kata kunci pencarian"
+     },
+     "limit": {
+      "type": "integer",
+      "description": "Jumlah hasil yang diminta (1-10). Gunakan 1 jika pengguna meminta satu rekomendasi."
+     },
+     "format": {
+      "type": "string",
+      "enum": [
+       "MANGA",
+       "MANHWA",
+       "MANHUA",
+       "KOMIK"
+      ],
+      "description": "Tipe karya eksplisit bila diminta pengguna."
+     },
+     "filter_special": {
+      "type": "boolean",
+      "description": "Filter kategori khusus, true atau false (default false)"
+     }
+    },
+    "required": [
+     "query"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "get_latest_comics",
+   "description": "Mengambil daftar komik dengan chapter yang baru saja diupdate di Ryukomik.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "limit": {
+      "type": "integer",
+      "description": "Jumlah komik (default 6)"
+     },
+     "genre": {
+      "type": "string",
+      "description": "Genre opsional, misalnya romance, aksi, fantasi, atau horror"
+     }
+    }
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "get_current_time",
+   "description": "Mengambil jam, tanggal, hari, dan zona waktu saat ini (WIB/WITA/WIT/UTC).",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "timezone": {
+      "type": "string",
+      "description": "Zona waktu (\"WIB\", \"WITA\", \"WIT\", \"UTC\", default \"WIB\")"
+     }
+    }
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "calculate_date_difference",
+   "description": "Menghitung selisih hari/bulan/tahun antara dua tanggal.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "target_date": {
+      "type": "string",
+      "description": "Tanggal target (YYYY-MM-DD) yang dibandingkan dengan hari ini"
+     }
+    },
+    "required": [
+     "target_date"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "add_user_note",
+   "description": "Menyimpan catatan baru, tugas, to-do list, atau target ke agenda pengguna di database permanen.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "title": {
+      "type": "string",
+      "description": "Judul catatan / tugas"
+     },
+     "content": {
+      "type": "string",
+      "description": "Detail isi catatan"
+     },
+     "category": {
+      "type": "string",
+      "description": "Kategori opsional: \"todo\", \"watchlist\", \"study\", \"general\""
+     },
+     "idempotency_key": {
+      "type": "string",
+      "description": "Kunci idempotensi opsional agar retry tidak membuat catatan ganda"
+     },
+     "timezone": {
+      "type": "string",
+      "description": "Zona waktu IANA pengguna, default Asia/Jakarta"
+     }
+    },
+    "required": [
+     "title",
+     "content"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "list_user_notes",
+   "description": "Melihat seluruh catatan atau to-do list tersimpan milik pengguna.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "category": {
+      "type": "string",
+      "description": "Filter kategori opsional (\"todo\", \"watchlist\", \"study\", dll)"
+     }
+    }
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "delete_user_note",
+   "description": "Menghapus catatan atau to-do list berdasarkan ID nomor catatan.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "note_id": {
+      "type": "integer",
+      "description": "ID catatan yang ingin dihapus"
+     }
+    },
+    "required": [
+     "note_id"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "schedule_task",
+   "description": "Membuat pengingat atau tugas terjadwal baru yang persisten (sekali atau berulang). Mendukung jadwal harian, mingguan, atau relatif (\"30 menit lagi\").",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "title": {
+      "type": "string",
+      "description": "Nama singkat pengingat (misal \"Review Anime Mingguan\")"
+     },
+     "description": {
+      "type": "string",
+      "description": "Detail apa yang harus dilakukan saat waktu tiba"
+     },
+     "schedule": {
+      "type": "string",
+      "description": "Jadwal bahasa natural: \"setiap Senin jam 8\", \"setiap hari jam 20:00\", \"30 menit lagi\", \"besok jam 9\""
+     },
+     "timezone": {
+      "type": "string",
+      "description": "Zona waktu IANA pengguna, default Asia/Jakarta"
+     },
+     "idempotency_key": {
+      "type": "string",
+      "description": "Kunci idempotensi opsional agar retry tidak menggandakan jadwal"
+     }
+    },
+    "required": [
+     "schedule"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "reschedule_task",
+   "description": "Mengubah waktu pengingat aktif. Jika task_id tidak diberikan, ubah pengingat aktif yang paling baru.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "task_id": {
+      "type": "integer",
+      "description": "ID pengingat opsional; default pengingat aktif terbaru"
+     },
+     "schedule": {
+      "type": "string",
+      "description": "Jadwal baru, misalnya \"hari ini jam 08:56\", \"10 menit lagi\", atau \"besok jam 9\""
+     },
+     "timezone": {
+      "type": "string",
+      "description": "Zona waktu IANA, default Asia/Jakarta"
+     }
+    },
+    "required": [
+     "schedule"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "list_scheduled_tasks",
+   "description": "Menampilkan semua pengingat dan tugas terjadwal aktif milik pengguna.",
+   "parameters": {
+    "type": "object",
+    "properties": {}
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "cancel_scheduled_task",
+   "description": "Membatalkan pengingat atau tugas terjadwal berdasarkan ID.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "task_id": {
+      "type": "integer",
+      "description": "ID tugas dari list_scheduled_tasks"
+     }
+    },
+    "required": [
+     "task_id"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "http_api_request",
+   "description": "Melakukan live test request HTTP/REST API (GET, POST, PUT, DELETE) ke URL target dengan metrik status code, latency ms, dan format JSON.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "url": {
+      "type": "string",
+      "description": "URL endpoint lengkap (http:// atau https://)"
+     },
+     "method": {
+      "type": "string",
+      "description": "Metode HTTP (\"GET\", \"POST\", \"PUT\", \"DELETE\", default \"GET\")"
+     },
+     "headers": {
+      "type": "object",
+      "description": "Header request opsional. Jangan kirim token/cookie kecuali benar-benar diperlukan."
+     },
+     "body": {
+      "type": "string",
+      "description": "Request body opsional untuk POST/PUT"
+     }
+    },
+    "required": [
+     "url"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "browse_page",
+   "description": "Membuka URL dengan browser nyata (headless), menunggu JavaScript selesai render, lalu mengekstrak teks konten halaman. Gunakan saat read_url biasa tidak berhasil (SPA, JS-heavy pages).",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "url": {
+      "type": "string",
+      "description": "URL lengkap halaman (https://...)"
+     },
+     "wait_for": {
+      "type": "string",
+      "description": "\"networkidle2\" untuk halaman kompleks, \"domcontentloaded\" untuk cepat (default: networkidle2)"
+     }
+    },
+    "required": [
+     "url"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "screenshot_url",
+   "description": "Mengambil screenshot halaman web dan mengembalikannya sebagai gambar.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "url": {
+      "type": "string",
+      "description": "URL halaman yang ingin di-screenshot"
+     },
+     "full_page": {
+      "type": "boolean",
+      "description": "Screenshot seluruh halaman atau hanya viewport (default false)"
+     }
+    },
+    "required": [
+     "url"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "browser_extract",
+   "description": "Mengekstrak data spesifik dari elemen HTML halaman web menggunakan CSS selector.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "url": {
+      "type": "string",
+      "description": "URL halaman"
+     },
+     "selector": {
+      "type": "string",
+      "description": "CSS selector (misal \"h1\", \".price\", \"#main p\", \"table tr\")"
+     },
+     "attribute": {
+      "type": "string",
+      "description": "\"text\", \"href\", atau \"src\" (default: text)"
+     }
+    },
+    "required": [
+     "url",
+     "selector"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "read_url",
+   "description": "Membaca dan mengekstrak teks isi dari tautan web atau artikel online.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "url": {
+      "type": "string",
+      "description": "URL halaman web lengkap (http:// atau https://)"
+     }
+    },
+    "required": [
+     "url"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "web_search",
+   "description": "Mencari informasi artikel, berita anime, fakta aktual, jadwal rilis, atau data terkini dari internet.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string",
+      "description": "Kata kunci pencarian spesifik"
+     },
+     "max_results": {
+      "type": "integer",
+      "description": "Jumlah hasil (1-6, default 4)"
+     }
+    },
+    "required": [
+     "query"
+    ]
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "run_skill_health_check",
+   "description": "Memeriksa apakah semua skill, handler, dan schema tool berhasil dimuat. Read-only dan tidak menjalankan tool lain.",
+   "parameters": {
+    "type": "object",
+    "properties": {}
+   }
+  }
+ }
+]
